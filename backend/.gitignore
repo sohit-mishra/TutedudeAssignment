@@ -1,0 +1,19 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variable files
+.env
+
+# Logs
+logs/
+*.log
+
+# Optional: if you use an IDE like VSCode, add its folders
+.vscode/
+
+# Optional: if you use temporary files for debugging or process tracking
+pids/
+*.pid
+
+# Optional: if you use any test coverage reports
+coverage/
