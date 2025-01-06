@@ -1,57 +1,51 @@
 import { createContext, useState, useEffect } from "react";
-import jwt from "jsonwebtoken";
+import Cookies from 'js-cookie';
 
 export const AuthContext = createContext();
 
 export function AuthContextProvider({ children }) {
-  const [isAuthentication, setIsAuthentication] = useState(localStorage.getItem("Authorizate") === "true");
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-
-  const decodeToken = (token) => {
-    try {
-      return jwt.decode(token);
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const checkTokenValidity = (token) => {
-    if (!token) return false;
-    const decoded = decodeToken(token);
-    return decoded ? Date.now() < decoded.exp * 1000 : false;
-  };
-
-  const handleAuthentication = (status) => {
-    setIsAuthentication(status);
-    localStorage.setItem("Authorizate", status.toString());
-  };
-
-  const setAuthToken = (newToken) => {
-    setToken(newToken);
-    localStorage.setItem("token", newToken);
-  };
-
-  const clearAuthData = () => {
-    setToken(null);
-    setIsAuthentication(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("Authorizate");
-  };
+  const [isAuthentication, setIsAuthentication] = useState(false);
+  const [userId, setUserId] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [profileImage, setProfileImage] = useState('');
 
   useEffect(() => {
-    if (token && checkTokenValidity(token)) {
-      handleAuthentication(true);
+    const Gettoken = Cookies.get('token');
+    const GetuserId = Cookies.get('userId');
+    const Getname = Cookies.get('name');
+    const Getemail = Cookies.get('email');
+    const GetprofileImage = Cookies.get('profileImage');
+    const GetAuthentication = Cookies.get('Authentication');
+
+    if (GetAuthentication === 'true') {
+      setIsAuthentication(true);
     } else {
-      clearAuthData();
+      setIsAuthentication(false);
     }
-  }, [token]);
+
+    
+    if (Gettoken) setToken(Gettoken);
+    if (GetuserId) setUserId(GetuserId);
+    if (Getname) setName(Getname);
+    if (Getemail) setEmail(Getemail);
+    if (GetprofileImage) setProfileImage(GetprofileImage);
+  }, []);
 
   const value = {
     isAuthentication,
+    setToken,
     token,
-    setAuthToken,
-    handleAuthentication,
-    clearAuthData, // Optional: for manually clearing auth data from other components
+    setIsAuthentication,
+    userId,
+    setUserId,
+    name,
+    setName,
+    email,
+    setEmail,
+    profileImage,
+    setProfileImage
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

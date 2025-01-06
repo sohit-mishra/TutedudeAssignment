@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "axois": "^0.0.1-security",
     "bcryptjs": "^2.4.3",
+    "buffer": "^6.0.3",
     "cloudinary": "^2.5.1",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",

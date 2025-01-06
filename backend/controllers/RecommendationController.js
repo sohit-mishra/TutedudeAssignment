@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const FriendRequest = require('../models/FriendRequest');
 
 const getFriendRecommendations = async (req, res) => {
   try {
@@ -12,9 +13,20 @@ const getFriendRecommendations = async (req, res) => {
       .populate('friends')
       .lean();
 
+    const existingRequests = await FriendRequest.find({
+      $or: [
+        { senderId: userId },
+        { receiverId: userId }
+      ]
+    }).lean();
+
+    const usersWithPendingOrAcceptedRequests = existingRequests.map(request => {
+      return request.senderId.toString() === userId ? request.receiverId.toString() : request.senderId.toString();
+    });
+
     const filteredRecommendations = recommendations.filter(potentialUser => {
       const potentialUserId = potentialUser._id.toString();
-      return !userFriends.includes(potentialUserId);
+      return !userFriends.includes(potentialUserId) && !usersWithPendingOrAcceptedRequests.includes(potentialUserId);
     });
 
     const recommendedWithMutuals = filteredRecommendations.map(potentialUser => {
@@ -24,21 +36,22 @@ const getFriendRecommendations = async (req, res) => {
         user: potentialUser,
         mutualFriendsCount: mutualFriends.length,
         mutualFriends,
+        existingRequestStatus: existingRequests.find(request => 
+          (request.senderId.toString() === potentialUser._id.toString() || 
+           request.receiverId.toString() === potentialUser._id.toString())
+        )?.status || 'none',
       };
     });
 
     const sortedRecommendations = recommendedWithMutuals.sort((a, b) => b.mutualFriendsCount - a.mutualFriendsCount);
 
-    const newUser = {
-      name: user.name,
-      profile: user.profile,
-      _id: user._id,
-    };
-
     const formattedRecommendations = sortedRecommendations.map(item => ({
       name: item.user.name,
       profile: item.user.profile,
       _id: item.user._id,
+      mutualFriendsCount: item.mutualFriendsCount,
+      mutualFriends: item.mutualFriends,
+      existingRequestStatus: item.existingRequestStatus,
     }));
 
     res.status(200).json(formattedRecommendations);

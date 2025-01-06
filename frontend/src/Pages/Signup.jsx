@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Input, Button, FormControl, FormLabel, Heading, useToast, Text, Image } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import defaultProfilePicture from '../assets/profileImage.jpg';
+import defaultProfilePicture from '../assets/profileImage.svg';
 
 export default function Signup() {
   const [email, setEmail] = useState('');

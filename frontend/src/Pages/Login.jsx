@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Box, Input, Button, FormControl, FormLabel, Heading, Text, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import Cookies from 'js-cookie';
 
 export default function Login() {
+  const {
+    setToken,
+    setIsAuthentication,
+    setUserId,
+    setName,
+    setEmail,
+    setProfileImage,
+  } = useContext(AuthContext);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const toast = useToast();
@@ -23,13 +34,26 @@ export default function Login() {
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/users/login`, {
-        email : username,
+        email: username,
         password,
       });
 
-      const { token } = response.data;
-     
-      localStorage.setItem('authToken', token);
+      const { token, name, email, profile, userId } = response.data;
+
+      
+      Cookies.set('token', token, { expires: 1/24, secure: true }); 
+      Cookies.set('userId', userId, { expires: 1/24, secure: true });
+      Cookies.set('name', name, { expires: 1/24, secure: true });
+      Cookies.set('email', email, { expires: 1/24, secure: true });
+      Cookies.set('profileImage', profile, { expires: 1/24, secure: true });
+      Cookies.set('Authentication', true, { expires: 1/24, secure: true });
+
+      setToken(token);
+      setIsAuthentication(true);
+      setUserId(userId);
+      setName(name);
+      setEmail(email);
+      setProfileImage(profile);
 
       toast({
         title: 'Success',
@@ -38,12 +62,13 @@ export default function Login() {
         duration: 3000,
         isClosable: true,
       });
-      
-      navigate('/dashboard'); 
+
+      navigate('/dashboard');
     } catch (error) {
+      const message = error.response?.data?.message || 'Something went wrong!';
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Something went wrong!',
+        description: message,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -51,13 +76,8 @@ export default function Login() {
     }
   };
 
-  const handleSignup = () => {
-    navigate('/signup');
-  };
-
-  const handleForgetPassword = () => {
-    navigate('/forget-password');
-  };
+  const handleSignup = () => navigate('/signup');
+  const handleForgetPassword = () => navigate('/forget-password');
 
   return (
     <Box

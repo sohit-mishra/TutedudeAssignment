@@ -11,20 +11,13 @@ export default function AllRoutes() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/confirm-password/:token" element={<ConfirmPassword />} />
+        <Route path="/login" element={<Login />} />
 
-       
-        <Route
-          path="/home"
-          element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          }
-        />
+      
         <Route
           path="/dashboard"
           element={
